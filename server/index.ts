@@ -1,43 +1,53 @@
-import express from 'express';
-import cors from 'cors';
-import { assignRandom, generateCode } from './logic';
+// Server Code (API)
 
-const app = express();
-const port = 3000;
 
-app.use(cors());
-app.use(express.json());
+import express from 'express'; // Framework for webserver
+import cors from 'cors';    // mid
+import { assignRandom, generateCode } from './logic'; // Importing game logics
 
-const gameData: Record<string, string[]> = {}; // 메모리 저장
+const app = express();  // Express App Creation
+const port = 3000;      // port setting (3000)
 
-// 게임 생성
+// Setting mid
+app.use(cors());    // All domains
+app.use(express.json()); // JSON Interpreter
+
+const gameData: Record<string, string[]> = {}; // Memory, EX) {"A1B2C": ["ABC", "DEF", "GHI"]}
+
+// Game Creation API
 app.post('/create', (req, res) => {
-  const { names } = req.body;
+    const { names } = req.body;
 
-  if (!Array.isArray(names) || names.length === 0) {
-    return res.status(400).json({ error: '이름 배열이 필요해요.' });
-  }
+    // Check if name is empty
+    if (!Array.isArray(names) || names.length === 0) {
+        return res.status(400).json({ error: 'Name array needed' });
+    }
 
-  const shuffled = assignRandom(names);
-  const code = generateCode();
-  gameData[code] = shuffled;
+    // Shuffle the names
+    const shuffled = assignRandom(names);
 
-  res.json({ code, results: shuffled });
+    // Code Creation
+    const code = generateCode();
+    gameData[code] = shuffled; // Insert shuffled names into code
+
+    // Result
+    res.json({ code, results: shuffled });
 });
 
-// 결과 조회
+// Getting API
 app.get('/join/:code', (req, res) => {
-  const { code } = req.params;
-  const result = gameData[code];
+    const { code } = req.params;
+    const result = gameData[code];
 
-  if (!result) {
-    return res.status(404).json({ error: '코드에 해당하는 게임이 없어요.' });
-  }
+    if (!result) {
+        return res.status(404).json({ error: 'No game existed' });
+    }
 
-  res.json({ names: result });
+    // return the result
+    res.json({ names: result });
 });
 
 // 서버 시작
 app.listen(port, () => {
-  console.log(`✅ Server running at http://localhost:${port}`);
+    console.log(`✅ Server running at http://localhost:${port}`);
 });
