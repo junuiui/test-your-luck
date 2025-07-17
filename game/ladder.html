@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>사다리 게임 | Test Your Luck</title>
+  <link rel="stylesheet" href="ladder.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 40px;
+    }
+
+    input[type="number"], input[type="text"] {
+      padding: 8px;
+      font-size: 14px;
+      width: 100px;
+      text-align: center;
+    }
+
+    .ladder-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
+      gap: 16px;
+    }
+
+    .row-inputs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    canvas {
+      background: #f9f9f9;
+      border: 1px solid #ccc;
+    }
+
+    .back {
+      margin-top: 40px;
+    }
+
+    .back a {
+      text-decoration: none;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪜 사다리 게임</h1>
+  <p>참가자 수 입력 후 사다리를 만들어보세요!</p>
+
+  <input type="number" id="playerCount" min="2" max="10" placeholder="예: 4" />
+  <button id="generateBtn">사다리 만들기</button>
+
+  <div id="ladderArea"></div>
+
+  <div class="back">
+    <a href="index.html">← 돌아가기</a>
+  </div>
+
+  <script type="module" src="ladder.js"></script>
+</body>
+</html>
