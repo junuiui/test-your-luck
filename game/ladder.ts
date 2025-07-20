@@ -3,21 +3,55 @@ function createLadder(rows: number, cols: number): number[][] {
     new Array(cols).fill(0)
   );
 
-  for (let r = 0; r < rows; r++) {
-    // 이 줄에 가로선 몇 개 넣을지 0 혹은 1개로 랜덤 결정
-    const horizontalCount = Math.random() < 0.5 ? 0 : 1;
+  const connected = Array.from({ length: cols }, (_, i) => i);
 
-    if (horizontalCount === 1) {
-      // 0~cols-2 사이 위치 랜덤 선택해서 한 개만 가로선 넣기
-      const pos = Math.floor(Math.random() * (cols - 1));
+  function find(a: number): number {
+    if (connected[a] !== a) connected[a] = find(connected[a]);
+    return connected[a];
+  }
 
-      // 해당 위치가 비어있고 다음 칸도 비어야 함
-      if (ladder[r][pos] === 0 && ladder[r][pos + 1] === 0) {
-        ladder[r][pos] = 1;
-        ladder[r][pos + 1] = 2;
-      }
+  function union(a: number, b: number) {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) connected[rootB] = rootA;
+  }
+
+  // 1. 연결 보장용 가로선 배치
+  let connects = 0;
+  while (connects < cols - 1) {
+    const r = Math.floor(Math.random() * (rows - 2)) + 1;
+    const c = Math.floor(Math.random() * (cols - 1));
+
+    if (
+      ladder[r][c] === 0 &&
+      ladder[r][c + 1] === 0 &&
+      find(c) !== find(c + 1)
+    ) {
+      ladder[r][c] = 1;
+      ladder[r][c + 1] = 2;
+      union(c, c + 1);
+      connects++;
     }
-    // horizontalCount가 0이면 이 줄은 아예 가로선 없이 그냥 세로로 쭉 내려가는 라인임
+  }
+
+  // 2. 추가 가로선 랜덤 배치 (각 줄에 3개 이상 목표)
+  for (let r = 1; r < rows-1; r++) {
+    let count = 0;
+    let tries = 0;
+    while (count < 3 && tries < 100) {
+      const c = Math.floor(Math.random() * (cols - 1));
+      if (
+        ladder[r][c] === 0 &&
+        ladder[r][c + 1] === 0 &&
+        (c === 0 || ladder[r][c - 1] !== 1) &&
+        (c + 2 >= cols || ladder[r][c + 2] !== 2)
+      ) {
+        ladder[r][c] = 1;
+        ladder[r][c + 1] = 2;
+        count++;
+      }
+      tries++;
+    }
   }
 
   return ladder;
@@ -77,7 +111,6 @@ function drawLadderCanvas(ladder: number[][], canvas: HTMLCanvasElement) {
     }
   }
 }
-
 
 // DOM 조작
 const playerInput = document.getElementById("playerCount") as HTMLInputElement;

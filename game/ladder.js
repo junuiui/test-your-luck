@@ -2,19 +2,48 @@ function createLadder(rows, cols) {
     var ladder = Array.from({ length: rows }, function () {
         return new Array(cols).fill(0);
     });
-    for (var r = 0; r < rows; r++) {
-        // 이 줄에 가로선 몇 개 넣을지 0 혹은 1개로 랜덤 결정
-        var horizontalCount = Math.random() < 0.5 ? 0 : 1;
-        if (horizontalCount === 1) {
-            // 0~cols-2 사이 위치 랜덤 선택해서 한 개만 가로선 넣기
-            var pos = Math.floor(Math.random() * (cols - 1));
-            // 해당 위치가 비어있고 다음 칸도 비어야 함
-            if (ladder[r][pos] === 0 && ladder[r][pos + 1] === 0) {
-                ladder[r][pos] = 1;
-                ladder[r][pos + 1] = 2;
-            }
+    var connected = Array.from({ length: cols }, function (_, i) { return i; });
+    function find(a) {
+        if (connected[a] !== a)
+            connected[a] = find(connected[a]);
+        return connected[a];
+    }
+    function union(a, b) {
+        var rootA = find(a);
+        var rootB = find(b);
+        if (rootA !== rootB)
+            connected[rootB] = rootA;
+    }
+    // 1. 연결 보장용 가로선 배치
+    var connects = 0;
+    while (connects < cols - 1) {
+        var r = Math.floor(Math.random() * (rows - 2)) + 1;
+        var c = Math.floor(Math.random() * (cols - 1));
+        if (ladder[r][c] === 0 &&
+            ladder[r][c + 1] === 0 &&
+            find(c) !== find(c + 1)) {
+            ladder[r][c] = 1;
+            ladder[r][c + 1] = 2;
+            union(c, c + 1);
+            connects++;
         }
-        // horizontalCount가 0이면 이 줄은 아예 가로선 없이 그냥 세로로 쭉 내려가는 라인임
+    }
+    // 2. 추가 가로선 랜덤 배치 (각 줄에 3개 이상 목표)
+    for (var r = 1; r < rows - 1; r++) {
+        var count = 0;
+        var tries = 0;
+        while (count < 3 && tries < 100) {
+            var c = Math.floor(Math.random() * (cols - 1));
+            if (ladder[r][c] === 0 &&
+                ladder[r][c + 1] === 0 &&
+                (c === 0 || ladder[r][c - 1] !== 1) &&
+                (c + 2 >= cols || ladder[r][c + 2] !== 2)) {
+                ladder[r][c] = 1;
+                ladder[r][c + 1] = 2;
+                count++;
+            }
+            tries++;
+        }
     }
     return ladder;
 }
